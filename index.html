@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Durlum Metal Ceilings | Network Architectural</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      color: #1c1c1c;
+      background: #fafaf9;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    button, input { font-family: inherit; }
+
+    /* ── Tokens ─────────────────────────────────────────────────────── */
+    :root {
+      --ink:       #0e1a2b;
+      --teal:      #1a7a74;
+      --teal-lt:   #e8f5f4;
+      --stone:     #f5f3f0;
+      --mid:       #9ca3af;
+      --line:      #e4e2de;
+      --white:     #ffffff;
+      --gutter:    clamp(24px, 5.5vw, 112px);
+      --max:       1380px;
+    }
+    .wrap {
+      max-width: var(--max);
+      margin-inline: auto;
+      padding-inline: var(--gutter);
+    }
+
+    /* ── Typography scale ───────────────────────────────────────────── */
+    .serif { font-family: 'DM Serif Display', Georgia, serif; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TOPBAR
+    ═══════════════════════════════════════════════════════════════ */
+    .topbar {
+      background: var(--ink);
+      padding: 8px 0;
+    }
+    .topbar .wrap {
+      display: flex;
+      justify-content: flex-end;
+      gap: 24px;
+    }
+    .topbar a {
+      font-size: 11.5px;
+      color: rgba(255,255,255,.5);
+      letter-spacing: .2px;
+      transition: color .15s;
+    }
+    .topbar a:hover { color: rgba(255,255,255,.85); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════════════════════════════ */
+    .nav-outer {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      gap: 32px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      flex-shrink: 0;
+      margin-right: auto;
+    }
+    .nav-brand svg { width: 34px; height: 34px; }
+    .nav-brand-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.25;
+    }
+    .nav-brand-name small {
+      display: block;
+      font-weight: 400;
+      letter-spacing: .5px;
+      color: var(--mid);
+      font-size: 10.5px;
+    }
+    .nav-links {
+      display: flex;
+      list-style: none;
+      align-items: center;
+      height: 100%;
+      gap: 2px;
+    }
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 64px;
+      padding: 0 13px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .nav-links a:hover { color: var(--teal); border-bottom-color: var(--teal); }
+    .nav-links svg { width: 10px; height: 10px; opacity: .45; }
+    .nav-btn {
+      padding: 9px 18px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover { background: var(--teal); }
+    @media (max-width: 860px) {
+      .nav-links { display: none; }
+      .nav-brand { margin-right: 0; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       BREADCRUMB
+    ═══════════════════════════════════════════════════════════════ */
+    .crumb {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 0;
+      background: var(--white);
+    }
+    .crumb ol {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      list-style: none;
+      font-size: 12px;
+      color: var(--mid);
+    }
+    .crumb ol li + li::before { content: '/'; margin-right: 6px; opacity: .5; }
+    .crumb ol a { color: var(--teal); }
+    .crumb ol a:hover { text-decoration: underline; }
+    .crumb ol li:last-child { color: #374151; font-weight: 500; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════════════ */
+    .hero {
+      position: relative;
+      height: clamp(460px, 55vw, 680px);
+      overflow: hidden;
+      background: var(--ink);
+    }
+    .hero-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 45%;
+      opacity: .72;
+    }
+    .hero-body {
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: clamp(40px, 5vw, 72px);
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.6);
+      margin-bottom: 16px;
+    }
+    .hero-tag::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: rgba(255,255,255,.4);
+    }
+    .hero-body h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(38px, 5.5vw, 72px);
+      font-weight: 400;
+      color: #fff;
+      line-height: 1.08;
+      letter-spacing: -.5px;
+      max-width: 680px;
+    }
+    .hero-body h1 em {
+      font-style: italic;
+      color: rgba(255,255,255,.75);
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 36px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      padding: 13px 28px;
+      background: var(--teal);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background .15s;
+      letter-spacing: .2px;
+    }
+    .btn-primary:hover { background: #146460; }
+    .btn-ghost {
+      padding: 12px 24px;
+      background: transparent;
+      color: rgba(255,255,255,.85);
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.5); }
+
+    /* hero stats strip */
+    .hero-stats {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      background: rgba(14,26,43,.75);
+      backdrop-filter: blur(8px);
+    }
+    .hero-stat {
+      padding: 20px 28px;
+      border-left: 1px solid rgba(255,255,255,.08);
+      text-align: center;
+    }
+    .hero-stat:first-child { border-left: none; }
+    .hero-stat strong {
+      display: block;
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      font-weight: 400;
+      color: #fff;
+      line-height: 1;
+    }
+    .hero-stat span {
+      display: block;
+      font-size: 11px;
+      color: rgba(255,255,255,.5);
+      letter-spacing: .5px;
+      margin-top: 4px;
+    }
+    @media (max-width: 640px) { .hero-stats { display: none; } }
+
+    /* ═══════════════════════════════════════════════════════════════
+       PRODUCT INTRO
+    ═══════════════════════════════════════════════════════════════ */
+    .intro {
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+      padding: 64px 0 56px;
+    }
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 80px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .intro-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+    /* — left — */
+    .intro-kicker {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .intro-kicker h1 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--ink);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      background: var(--teal-lt);
+      color: var(--teal);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      border-radius: 20px;
+      border: 1px solid #a7d4d1;
+    }
+    .badge::before { content: '✓'; }
+
+    .intro-headline {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(26px, 3vw, 40px);
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.2;
+      margin-bottom: 28px;
+      max-width: 580px;
+    }
+    .intro-lead {
+      font-size: 15.5px;
+      color: #374151;
+      line-height: 1.75;
+      margin-bottom: 28px;
+      max-width: 600px;
+    }
+    .intro-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      border-top: 1px solid var(--line);
+      padding-top: 28px;
+    }
+    @media (max-width: 540px) { .intro-cols { grid-template-columns: 1fr; } }
+    .intro-cols h4 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .intro-cols p { font-size: 13.5px; color: #4b5563; line-height: 1.75; }
+
+    /* — sidebar — */
+    .sidebar {
+      position: sticky;
+      top: 80px;
+    }
+    .sidebar-panel {
+      background: var(--stone);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 24px;
+    }
+    .sidebar-section { margin-bottom: 22px; }
+    .sidebar-section:last-of-type { margin-bottom: 0; }
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--mid);
+      margin-bottom: 10px;
+    }
+    .sidebar-list { list-style: none; }
+    .sidebar-list li { margin-bottom: 7px; }
+    .sidebar-list a {
+      font-size: 13px;
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .12s;
+    }
+    .sidebar-list a:hover { color: #146460; text-decoration: underline; }
+    .sidebar-list a::before {
+      content: '';
+      display: block;
+      width: 5px;
+      height: 5px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: rotate(-45deg);
+      flex-shrink: 0;
+    }
+    .sidebar-divider {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 20px 0;
+    }
+    .btn-full {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      background: var(--ink);
+      color: #fff;
+      text-align: center;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background .15s;
+      letter-spacing: .3px;
+    }
+    .btn-full:hover { background: var(--teal); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SECTION COMMON
+    ═══════════════════════════════════════════════════════════════ */
+    .sec { padding: 72px 0; }
+    .sec.bg-stone { background: var(--stone); }
+    .sec.bg-white { background: var(--white); }
+    .sec.bg-ink   { background: var(--ink); }
+
+    .sec-hd {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .sec-hd-left {}
+    .sec-eyebrow {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+    .sec-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(22px, 2.5vw, 32px);
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .sec-title.light { color: #fff; }
+    .sec-link {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--teal);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: color .12s;
+      flex-shrink: 0;
+    }
+    .sec-link:hover { color: #146460; text-decoration: underline; }
+    .sec-link.light { color: rgba(255,255,255,.55); }
+    .sec-link.light:hover { color: #fff; }
+    .sec-link::after { content: '→'; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       PRODUCTS — editorial 3-col
+    ═══════════════════════════════════════════════════════════════ */
+    .prod-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 720px) { .prod-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .prod-grid { grid-template-columns: 1fr; } }
+
+    .prod-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .prod-card:hover { box-shadow: 0 8px 32px rgba(14,26,43,.1); transform: translateY(-2px); }
+    .prod-card-img {
+      width: 100%;
+      aspect-ratio: 5/4;
+      object-fit: cover;
+      display: block;
+      background: #dde4ea;
+      transition: transform .4s;
+    }
+    .prod-card:hover .prod-card-img { transform: scale(1.04); }
+    .prod-card-img-wrap { overflow: hidden; }
+    .prod-card-body { padding: 20px 22px 24px; }
+    .prod-card-cat {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+    .prod-card-body h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+    .prod-card-body p {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+    .prod-card-link {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--teal);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .prod-card-link:hover { text-decoration: underline; }
+    .prod-card-link::after { content: '→'; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       GALLERY — asymmetric mosaic
+    ═══════════════════════════════════════════════════════════════ */
+    .gallery-mosaic {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-rows: 280px 220px;
+      gap: 6px;
+    }
+    @media (max-width: 768px) {
+      .gallery-mosaic {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 200px 200px 180px;
+      }
+      .gallery-mosaic .g-tall { grid-row: span 1; }
+    }
+    @media (max-width: 480px) {
+      .gallery-mosaic { grid-template-columns: 1fr; grid-template-rows: unset; }
+    }
+
+    .g-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      background: #d0d8e4;
+      cursor: pointer;
+    }
+    .g-tall { grid-row: span 2; }
+    .g-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .45s ease;
+    }
+    .g-item:hover img { transform: scale(1.07); }
+    .g-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(14,26,43,.8) 0%, transparent 100%);
+      padding: 32px 14px 14px;
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .g-item:hover .g-caption { opacity: 1; }
+    .g-caption span {
+      font-size: 12px;
+      font-weight: 500;
+      color: #fff;
+      display: block;
+    }
+    .g-caption small {
+      font-size: 11px;
+      color: rgba(255,255,255,.6);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RELATED PROJECTS — horizontal scroll cards
+    ═══════════════════════════════════════════════════════════════ */
+    .proj-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 860px) { .proj-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .proj-grid { grid-template-columns: 1fr; } }
+
+    .proj-card { cursor: pointer; }
+    .proj-card-img-wrap {
+      aspect-ratio: 4/3;
+      border-radius: 5px;
+      overflow: hidden;
+      background: #cdd5e0;
+      margin-bottom: 14px;
+    }
+    .proj-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .38s;
+    }
+    .proj-card:hover .proj-card-img { transform: scale(1.06); }
+    .proj-card-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--teal);
+      background: var(--teal-lt);
+      border-radius: 2px;
+      padding: 2px 8px;
+      margin-bottom: 7px;
+    }
+    .proj-card h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.35;
+      margin-bottom: 3px;
+    }
+    .proj-card p { font-size: 12px; color: var(--mid); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SPECIALISTS
+    ═══════════════════════════════════════════════════════════════ */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 860px) { .spec-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .spec-grid { grid-template-columns: 1fr; } }
+
+    .spec-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .spec-photo {
+      width: 100%;
+      aspect-ratio: 4/5;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      background: #cdd5df;
+      filter: grayscale(15%);
+      transition: filter .25s;
+    }
+    .spec-card:hover .spec-photo { filter: grayscale(0%); }
+    .spec-info { padding: 16px 18px 18px; }
+    .spec-info h4 {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+    .spec-info .role {
+      font-size: 12px;
+      color: var(--mid);
+      margin-bottom: 12px;
+    }
+    .spec-info a {
+      font-size: 12.5px;
+      color: var(--teal);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: color .12s;
+    }
+    .spec-info a:hover { text-decoration: underline; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FAQS — two col
+    ═══════════════════════════════════════════════════════════════ */
+    .faq-cols {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    @media (max-width: 760px) { .faq-cols { grid-template-columns: 1fr; gap: 36px; } }
+
+    .faq-aside p {
+      font-size: 14px;
+      color: #4b5563;
+      line-height: 1.7;
+      margin-top: 16px;
+    }
+    .faq-aside .btn-outline {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: 1.5px solid var(--ink);
+      border-radius: 3px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink);
+      transition: all .15s;
+    }
+    .faq-aside .btn-outline:hover { background: var(--ink); color: #fff; }
+
+    .faq-list { list-style: none; }
+    .faq-item { border-bottom: 1px solid var(--line); }
+    .faq-item:first-child { border-top: 1px solid var(--line); }
+    .faq-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 18px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      cursor: pointer;
+      transition: color .12s;
+    }
+    .faq-btn:hover { color: var(--teal); }
+    .faq-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      line-height: 1;
+      color: var(--mid);
+      transition: transform .22s, border-color .15s, color .15s;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); border-color: var(--teal); color: var(--teal); }
+    .faq-item.open .faq-btn { color: var(--teal); }
+    .faq-body {
+      font-size: 13.5px;
+      color: #4b5563;
+      line-height: 1.8;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .3s ease, padding-bottom .3s;
+    }
+    .faq-item.open .faq-body { max-height: 480px; padding-bottom: 18px; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       OTHER PRODUCTS — edge-to-edge grid
+    ═══════════════════════════════════════════════════════════════ */
+    .other-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+    @media (max-width: 680px) { .other-grid { grid-template-columns: 1fr 1fr; } }
+
+    .other-item {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      background: #c8d3de;
+      cursor: pointer;
+    }
+    .other-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s;
+    }
+    .other-item:hover img { transform: scale(1.06); }
+    .other-item-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(14,26,43,.82) 0%, rgba(14,26,43,.15) 55%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 20px;
+      transition: background .25s;
+    }
+    .other-item:hover .other-item-overlay {
+      background: linear-gradient(to top, rgba(14,26,43,.92) 0%, rgba(14,26,43,.3) 55%, transparent 100%);
+    }
+    .other-item-overlay h3 {
+      font-size: 13.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 2px;
+    }
+    .other-item-overlay p {
+      font-size: 11.5px;
+      color: rgba(255,255,255,.55);
+      transition: color .2s;
+    }
+    .other-item:hover .other-item-overlay p { color: rgba(255,255,255,.8); }
+    .other-item-overlay .arrow {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--teal);
+      letter-spacing: .5px;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .2s, transform .2s;
+    }
+    .other-item:hover .arrow { opacity: 1; transform: translateY(0); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NEWSLETTER
+    ═══════════════════════════════════════════════════════════════ */
+    .nl-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+      padding: 64px 0;
+    }
+    @media (max-width: 700px) { .nl-inner { grid-template-columns: 1fr; gap: 32px; } }
+    .nl-left h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      font-weight: 400;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .nl-left p { font-size: 13.5px; color: rgba(255,255,255,.5); }
+    .nl-form { display: flex; gap: 10px; }
+    @media (max-width: 480px) { .nl-form { flex-direction: column; } }
+    .nl-form input {
+      flex: 1;
+      padding: 12px 16px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 3px;
+      color: #fff;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .nl-form input::placeholder { color: rgba(255,255,255,.3); }
+    .nl-form input:focus { border-color: var(--teal); }
+    .nl-form button {
+      padding: 12px 24px;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .nl-form button:hover { background: #146460; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════════════ */
+    .footer { background: #0a1625; }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 48px;
+      padding: 64px 0 56px;
+    }
+    @media (max-width: 860px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .footer-top { grid-template-columns: 1fr; } }
+
+    .footer-brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .footer-brand-logo svg { width: 30px; height: 30px; }
+    .footer-brand-logo span {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .9px;
+      color: rgba(255,255,255,.8);
+    }
+    .footer-brand-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,.35);
+      line-height: 1.75;
+      max-width: 260px;
+      margin-bottom: 20px;
+    }
+    .footer-socials { display: flex; gap: 10px; }
+    .social-dot {
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: rgba(255,255,255,.4);
+      transition: all .15s;
+    }
+    .social-dot:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.8); }
+
+    .footer-col h5 {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255,255,255,.4);
+      margin-bottom: 18px;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul a {
+      font-size: 13px;
+      color: rgba(255,255,255,.5);
+      transition: color .12s;
+    }
+    .footer-col ul a:hover { color: rgba(255,255,255,.9); }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .footer-bottom p { font-size: 11.5px; color: rgba(255,255,255,.25); }
+    .footer-certs { display: flex; gap: 10px; flex-wrap: wrap; }
+    .cert-pill {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: rgba(255,255,255,.3);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 2px;
+      padding: 4px 9px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SCROLL TOP
+    ═══════════════════════════════════════════════════════════════ */
+    #scrollTop {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 40px;
+      height: 40px;
+      background: var(--ink);
+      border: none;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s, background .15s;
+    }
+    #scrollTop.show { opacity: 1; pointer-events: all; }
+    #scrollTop:hover { background: var(--teal); }
+  </style>
+</head>
+<body>
+
+<!-- ── Topbar ─────────────────────────────────────────────────── -->
+<div class="topbar">
+  <div class="wrap">
+    <a href="tel:+61294178899">+61 2 9417 8899</a>
+    <a href="mailto:info@networkarchitectural.com.au">info@networkarchitectural.com.au</a>
+    <a href="#">Australia &amp; NZ</a>
+  </div>
+</div>
+
+<!-- ── Nav ───────────────────────────────────────────────────── -->
+<header class="nav-outer">
+  <nav class="wrap nav">
+    <a class="nav-brand" href="#">
+      <svg viewBox="0 0 34 34" fill="none">
+        <rect width="34" height="34" rx="3" fill="#0e1a2b"/>
+        <polygon points="17,5 5,11 5,23 17,29 29,23 29,11" fill="none" stroke="white" stroke-width="1.5"/>
+        <line x1="17" y1="5" x2="17" y2="29" stroke="white" stroke-width="1" opacity=".35"/>
+        <line x1="5" y1="11" x2="29" y2="23" stroke="white" stroke-width="1" opacity=".35"/>
+        <line x1="29" y1="11" x2="5" y2="23" stroke="white" stroke-width="1" opacity=".35"/>
+      </svg>
+      <div class="nav-brand-name">
+        Network<small>Architectural</small>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">Ceilings <svg viewBox="0 0 10 10"><path d="M5 7L1 3h8z" fill="currentColor"/></svg></a></li>
+      <li><a href="#">Facades <svg viewBox="0 0 10 10"><path d="M5 7L1 3h8z" fill="currentColor"/></svg></a></li>
+      <li><a href="#">Products</a></li>
+      <li><a href="#">Projects</a></li>
+      <li><a href="#">Resources</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <button class="nav-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Request a sample</button>
+  </nav>
+</header>
+
+<!-- ── Breadcrumb ─────────────────────────────────────────────── -->
+<nav class="crumb" aria-label="Breadcrumb">
+  <div class="wrap">
+    <ol>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Ceilings</a></li>
+      <li><a href="#">Products</a></li>
+      <li>Durlum Metal Ceilings</li>
+    </ol>
+  </div>
+</nav>
+
+<!-- ── Hero ──────────────────────────────────────────────────── -->
+<section class="hero">
+  <img class="hero-img"
+    src="https://www.figma.com/api/mcp/asset/4b29759c-7a13-4f26-81a2-6c3d9e62f777"
+    alt="Durlum metal ceiling installation at Castle Towers"
+  />
+  <div class="wrap hero-body">
+    <p class="hero-tag">Metal Ceilings</p>
+    <h1 class="serif">Precision-crafted<br><em>metal ceilings</em></h1>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Explore products</button>
+      <button class="btn-ghost" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Talk to a specialist</button>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><strong>40+</strong><span>Years experience</span></div>
+    <div class="hero-stat"><strong>500+</strong><span>Projects completed</span></div>
+    <div class="hero-stat"><strong>Green A</strong><span>Certified</span></div>
+  </div>
+</section>
+
+<!-- ── Product Intro ──────────────────────────────────────────── -->
+<section class="intro">
+  <div class="wrap intro-grid">
+    <!-- Main -->
+    <div>
+      <div class="intro-kicker">
+        <h1>Durlum Metal Ceilings</h1>
+        <span class="badge">Green Rate A</span>
+      </div>
+      <h2 class="intro-headline serif">durlum metal ceilings &amp; lighting solutions</h2>
+      <p class="intro-lead">Durlum is a world-leading manufacturer of metal ceiling systems. For decades, durlum has combined aesthetic design with acoustic performance and technical precision — delivering solutions tailored to every project type, scale, and specification.</p>
+      <div class="intro-cols">
+        <div>
+          <h4>A perfect fit for every space</h4>
+          <p>Whether you are designing a modern office, high-end retail environment, or a complex transportation hub, durlum delivers solutions tailored to your project requirements with uncompromising quality.</p>
+        </div>
+        <div>
+          <h4>An ideal solution for architects</h4>
+          <p>durlum works closely with architects and designers from concept through to installation. Products are manufactured from high-quality steel and aluminium in a wide range of perforation patterns, finishes, and custom colours.</p>
+        </div>
+      </div>
+    </div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-panel">
+        <div class="sidebar-section">
+          <p class="sidebar-label">Downloads &amp; Resources</p>
+          <ul class="sidebar-list">
+            <li><a href="#">Sustainability Report</a></li>
+            <li><a href="#">Technical Data Sheets</a></li>
+            <li><a href="#">BIM Objects</a></li>
+            <li><a href="#">Installation Guides</a></li>
+            <li><a href="#">Acoustic Performance Data</a></li>
+            <li><a href="#">Colour &amp; Finish Guide</a></li>
+            <li><a href="#">Product Specifications PDF</a></li>
+            <li><a href="#">NBS Specification</a></li>
+            <li><a href="#">CAD Drawings</a></li>
+          </ul>
+        </div>
+        <hr class="sidebar-divider" />
+        <button class="btn-full" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Request a sample</button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ── Products ───────────────────────────────────────────────── -->
+<section class="sec bg-stone" id="products">
+  <div class="wrap">
+    <div class="sec-hd">
+      <div class="sec-hd-left">
+        <p class="sec-eyebrow">Product Range</p>
+        <h2 class="sec-title">Products</h2>
+      </div>
+      <a class="sec-link" href="#">View all products</a>
+    </div>
+    <div class="prod-grid">
+
+      <article class="prod-card">
+        <div class="prod-card-img-wrap">
+          <img class="prod-card-img"
+            src="https://www.figma.com/api/mcp/asset/1837252f-2732-4d0a-baa8-f7708732b007"
+            alt="CSM Polylam Vertical Baffle System"
+          />
+        </div>
+        <div class="prod-card-body">
+          <p class="prod-card-cat">Baffle System</p>
+          <h3>CSM Polylam Vertical Baffle</h3>
+          <p>Vertically hung metal baffles delivering outstanding acoustic performance for open-plan environments.</p>
+          <span class="prod-card-link">View product</span>
+        </div>
+      </article>
+
+      <article class="prod-card">
+        <div class="prod-card-img-wrap">
+          <img class="prod-card-img"
+            src="https://www.figma.com/api/mcp/asset/5bf16bb4-83ce-47c6-842c-a6e618d9d75d"
+            alt="Durlum Linear Metal Ceilings"
+          />
+        </div>
+        <div class="prod-card-body">
+          <p class="prod-card-cat">Linear System</p>
+          <h3>Linear Metal Ceilings</h3>
+          <p>Clean continuous lines creating sophisticated modern interiors with integrated lighting capability.</p>
+          <span class="prod-card-link">View product</span>
+        </div>
+      </article>
+
+      <article class="prod-card">
+        <div class="prod-card-img-wrap">
+          <img class="prod-card-img"
+            src="https://www.figma.com/api/mcp/asset/04ad73cb-c8b7-41e1-a24e-5920bed77cd8"
+            alt="Durlum Perforated Tile Systems"
+          />
+        </div>
+        <div class="prod-card-body">
+          <p class="prod-card-cat">Tile System</p>
+          <h3>Perforated Tile Systems</h3>
+          <p>Versatile modular tiles with exceptional acoustic absorption and a broad finish palette.</p>
+          <span class="prod-card-link">View product</span>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Image Gallery ──────────────────────────────────────────── -->
+<section class="sec bg-white">
+  <div class="wrap">
+    <div class="sec-hd">
+      <div class="sec-hd-left">
+        <p class="sec-eyebrow">Installation Photography</p>
+        <h2 class="sec-title">Image Gallery</h2>
+      </div>
+    </div>
+    <div class="gallery-mosaic">
+      <!-- tall left -->
+      <div class="g-item g-tall">
+        <img src="https://www.figma.com/api/mcp/asset/ce7406cd-6a46-44ef-979c-1d93f0e98d83" alt="Office Interior" loading="lazy" />
+        <div class="g-caption"><span>Office Interior</span><small>Sydney, NSW</small></div>
+      </div>
+      <!-- right 2×2 -->
+      <div class="g-item">
+        <img src="https://www.figma.com/api/mcp/asset/c4fccdbb-dabe-4190-a863-61d5dba99463" alt="Retail Fitout" loading="lazy" />
+        <div class="g-caption"><span>Retail Fitout</span><small>Melbourne, VIC</small></div>
+      </div>
+      <div class="g-item">
+        <img src="https://www.figma.com/api/mcp/asset/b5bd5364-50ee-49ba-8a74-edb22a12ad45" alt="Transport Hub" loading="lazy" />
+        <div class="g-caption"><span>Transport Hub</span><small>Brisbane, QLD</small></div>
+      </div>
+      <div class="g-item">
+        <img src="https://www.figma.com/api/mcp/asset/fdd5b159-9c46-42bd-80e2-8faf138367e3" alt="Baffle Installation" loading="lazy" />
+        <div class="g-caption"><span>Baffle Installation</span><small>Perth, WA</small></div>
+      </div>
+      <div class="g-item">
+        <img src="https://www.figma.com/api/mcp/asset/2d6c0e66-cd17-493d-84f2-81180c43eb8e" alt="Hospital Fitout" loading="lazy" />
+        <div class="g-caption"><span>Healthcare Fitout</span><small>Adelaide, SA</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Related Projects ───────────────────────────────────────── -->
+<section class="sec bg-stone" id="projects">
+  <div class="wrap">
+    <div class="sec-hd">
+      <div class="sec-hd-left">
+        <p class="sec-eyebrow">Case Studies</p>
+        <h2 class="sec-title">Related Projects</h2>
+      </div>
+      <a class="sec-link" href="#">View all projects</a>
+    </div>
+    <div class="proj-grid">
+
+      <article class="proj-card">
+        <div class="proj-card-img-wrap">
+          <img class="proj-card-img"
+            src="https://www.figma.com/api/mcp/asset/49a244b8-ff62-44c0-952a-60381b2be112"
+            alt="Martin Place Precinct" loading="lazy"
+          />
+        </div>
+        <span class="proj-card-tag">Metal Ceilings</span>
+        <h4>Martin Place Precinct</h4>
+        <p>Sydney, NSW &mdash; 2024</p>
+      </article>
+
+      <article class="proj-card">
+        <div class="proj-card-img-wrap">
+          <img class="proj-card-img"
+            src="https://www.figma.com/api/mcp/asset/f1b4450a-d23c-4a14-9182-476ec3129987"
+            alt="Barangaroo South Tower" loading="lazy"
+          />
+        </div>
+        <span class="proj-card-tag">Linear System</span>
+        <h4>Barangaroo South Tower</h4>
+        <p>Sydney, NSW &mdash; 2023</p>
+      </article>
+
+      <article class="proj-card">
+        <div class="proj-card-img-wrap">
+          <img class="proj-card-img"
+            src="https://www.figma.com/api/mcp/asset/b1ddf985-dc81-4a66-9efc-6818544b396f"
+            alt="Melbourne Airport Terminal 4" loading="lazy"
+          />
+        </div>
+        <span class="proj-card-tag">Baffle System</span>
+        <h4>Melbourne Airport Terminal 4</h4>
+        <p>Tullamarine, VIC &mdash; 2024</p>
+      </article>
+
+      <article class="proj-card">
+        <div class="proj-card-img-wrap">
+          <img class="proj-card-img"
+            src="https://www.figma.com/api/mcp/asset/4fccdbb-dabe-4190-a863-61d5dba99463"
+            alt="Perth Children's Hospital" loading="lazy"
+          />
+        </div>
+        <span class="proj-card-tag">Tile System</span>
+        <h4>Perth Children's Hospital</h4>
+        <p>Perth, WA &mdash; 2022</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Talk to a Specialist ───────────────────────────────────── -->
+<section class="sec bg-white" id="contact">
+  <div class="wrap">
+    <div class="sec-hd">
+      <div class="sec-hd-left">
+        <p class="sec-eyebrow">Our Team</p>
+        <h2 class="sec-title">Talk to a specialist</h2>
+      </div>
+      <a class="sec-link" href="#">Find your local rep</a>
+    </div>
+    <div class="spec-grid">
+
+      <div class="spec-card">
+        <img class="spec-photo"
+          src="https://www.figma.com/api/mcp/asset/323494a3-541d-4f9f-847b-e222a2ce85e8"
+          alt="Paul Sheehan" loading="lazy"
+        />
+        <div class="spec-info">
+          <h4>Paul Sheehan</h4>
+          <p class="role">Sales Director</p>
+          <a href="tel:+61294178890">&#9990;&nbsp;+61 2 9417 8890</a>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <img class="spec-photo"
+          src="https://www.figma.com/api/mcp/asset/cf07f66e-6a3e-4521-8a1c-750c3726083c"
+          alt="Anna Fischer" loading="lazy"
+        />
+        <div class="spec-info">
+          <h4>Anna Fischer</h4>
+          <p class="role">Technical Specialist</p>
+          <a href="tel:+61294178891">&#9990;&nbsp;+61 2 9417 8891</a>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <img class="spec-photo"
+          src="https://www.figma.com/api/mcp/asset/c873ff52-695a-4417-9d61-3a73cb54a488"
+          alt="Steven Fraser" loading="lazy"
+        />
+        <div class="spec-info">
+          <h4>Steven Fraser</h4>
+          <p class="role">Project Consultant</p>
+          <a href="tel:+61294178892">&#9990;&nbsp;+61 2 9417 8892</a>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <img class="spec-photo"
+          src="https://www.figma.com/api/mcp/asset/57d9aa38-9440-4d00-b7ea-96ccf5bcc720"
+          alt="Peter Robson" loading="lazy"
+        />
+        <div class="spec-info">
+          <h4>Peter Robson</h4>
+          <p class="role">National BDM</p>
+          <a href="tel:+61294178893">&#9990;&nbsp;+61 2 9417 8893</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQs ───────────────────────────────────────────────────── -->
+<section class="sec bg-stone" id="faq">
+  <div class="wrap">
+    <div class="faq-cols">
+      <!-- Aside -->
+      <div class="faq-aside">
+        <p class="sec-eyebrow">Support</p>
+        <h2 class="sec-title serif">Frequently asked questions</h2>
+        <p>Can't find your answer here? Our technical team is available to assist with specification, design, and installation queries.</p>
+        <a class="btn-outline" href="mailto:info@networkarchitectural.com.au">Contact technical team</a>
+      </div>
+      <!-- List -->
+      <ul class="faq-list">
+        <li class="faq-item open">
+          <button class="faq-btn" aria-expanded="true">
+            What are durlum metal ceilings made from?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-body">Durlum metal ceilings are manufactured from high-quality galvanised steel and aluminium, powder-coated in virtually any RAL or custom colour across a wide range of perforation patterns.</div>
+        </li>
+        <li class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            Are durlum products suitable for external applications?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-body">Selected durlum systems are designed for external soffit applications, available in marine-grade aluminium or stainless steel with protective coatings for high-exposure environments.</div>
+        </li>
+        <li class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            Can I get custom perforations or patterns?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-body">Yes — durlum manufactures custom perforations for unique design requirements alongside an extensive range of standard patterns. Minimum order quantities apply for bespoke tooling.</div>
+        </li>
+        <li class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            What is the lead time for durlum products?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-body">Standard products typically have a 4–6 week lead time from order confirmation. Custom and large-volume orders may require additional lead time — contact our sales team for a project-specific schedule.</div>
+        </li>
+        <li class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            Does durlum provide installation support?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-body">Network Architectural provides full installation documentation, shop drawings, and on-site technical assistance. Installer training workshops are also available.</div>
+        </li>
+        <li class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            Are durlum products environmentally certified?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-body">Yes — durlum holds Green Rate A certification and contributes to LEED, Green Star, and BREEAM credits through material efficiency, recycled content, and low-VOC coatings.</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ── Other Products ─────────────────────────────────────────── -->
+<section class="sec bg-white">
+  <div class="wrap">
+    <div class="sec-hd">
+      <div class="sec-hd-left">
+        <p class="sec-eyebrow">Also Available</p>
+        <h2 class="sec-title">Other Products</h2>
+      </div>
+      <a class="sec-link" href="#">Browse all</a>
+    </div>
+  </div>
+  <!-- full bleed grid, no wrap -->
+  <div class="other-grid" style="margin-top:0">
+    <div class="other-item">
+      <img src="https://www.figma.com/api/mcp/asset/ce7406cd-6a46-44ef-979c-1d93f0e98d83" alt="Autex Acoustics" loading="lazy" />
+      <div class="other-item-overlay"><h3>Autex Acoustics</h3><p>Acoustic wall &amp; ceiling solutions</p><span class="arrow">View range →</span></div>
+    </div>
+    <div class="other-item">
+      <img src="https://www.figma.com/api/mcp/asset/c4fccdbb-dabe-4190-a863-61d5dba99463" alt="Autex Tiles" loading="lazy" />
+      <div class="other-item-overlay"><h3>Autex Tiles</h3><p>Modular acoustic tile systems</p><span class="arrow">View range →</span></div>
+    </div>
+    <div class="other-item">
+      <img src="https://www.figma.com/api/mcp/asset/b5bd5364-50ee-49ba-8a74-edb22a12ad45" alt="CMS Mineral Fibre" loading="lazy" />
+      <div class="other-item-overlay"><h3>CMS Mineral Fibre Ceilings</h3><p>Fire-rated mineral fibre systems</p><span class="arrow">View range →</span></div>
+    </div>
+    <div class="other-item">
+      <img src="https://www.figma.com/api/mcp/asset/1837252f-2732-4d0a-baa8-f7708732b007" alt="Knauf Metal Ceilings" loading="lazy" />
+      <div class="other-item-overlay"><h3>Knauf Metal Ceilings</h3><p>Steel &amp; aluminium systems</p><span class="arrow">View range →</span></div>
+    </div>
+    <div class="other-item">
+      <img src="https://www.figma.com/api/mcp/asset/5bf16bb4-83ce-47c6-842c-a6e618d9d75d" alt="Parklex Facades" loading="lazy" />
+      <div class="other-item-overlay"><h3>Parklex Facades</h3><p>Natural wood veneer cladding</p><span class="arrow">View range →</span></div>
+    </div>
+    <div class="other-item">
+      <img src="https://www.figma.com/api/mcp/asset/04ad73cb-c8b7-41e1-a24e-5920bed77cd8" alt="Durlum + CSM" loading="lazy" />
+      <div class="other-item-overlay"><h3>Durlum + CSM</h3><p>Combined ceiling solutions</p><span class="arrow">View range →</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Newsletter ─────────────────────────────────────────────── -->
+<div class="sec bg-ink">
+  <div class="wrap nl-inner">
+    <div class="nl-left">
+      <h3 class="serif">Stay informed</h3>
+      <p>Receive product updates, project news, and CPD events by email. Unsubscribe at any time.</p>
+    </div>
+    <form class="nl-form" onsubmit="onSubscribe(event)">
+      <input type="email" placeholder="Your email address" aria-label="Email address" required />
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+
+      <div>
+        <div class="footer-brand-logo">
+          <svg viewBox="0 0 30 30" fill="none">
+            <polygon points="15,3 3,9 3,21 15,27 27,21 27,9" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.4"/>
+            <line x1="15" y1="3" x2="15" y2="27" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+            <line x1="3" y1="9" x2="27" y2="21" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+            <line x1="27" y1="9" x2="3" y2="21" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          </svg>
+          <span>Network Architectural</span>
+        </div>
+        <p class="footer-brand-desc">Specialists in architectural products for ceilings, walls, floors, and facades. Trusted by architects across Australia and New Zealand.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-dot">in</a>
+          <a href="#" class="social-dot">ig</a>
+          <a href="#" class="social-dot">fb</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h5>Products</h5>
+        <ul>
+          <li><a href="#">Metal Ceilings</a></li>
+          <li><a href="#">Mineral Fibre Ceilings</a></li>
+          <li><a href="#">Acoustic Systems</a></li>
+          <li><a href="#">Facades &amp; Cladding</a></li>
+          <li><a href="#">Baffle Ceilings</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Projects</a></li>
+          <li><a href="#">Awards</a></li>
+          <li><a href="#">Sustainability</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="#">Technical Library</a></li>
+          <li><a href="#">BIM Objects</a></li>
+          <li><a href="#">NBS Specifications</a></li>
+          <li><a href="#">CPD Training</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 Network Architectural Pty Ltd. All rights reserved.</p>
+      <div class="footer-certs">
+        <span class="cert-pill">Sustainability Awards 2025</span>
+        <span class="cert-pill">OCN Sponsor</span>
+        <span class="cert-pill">AIA CPD Provider</span>
+        <span class="cert-pill">Green Rate A</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<button id="scrollTop" aria-label="Back to top">↑</button>
+
+<script>
+  // FAQ
+  document.querySelectorAll('.faq-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const opening = !item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-btn').setAttribute('aria-expanded', 'false');
+      });
+      if (opening) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  // Newsletter
+  function onSubscribe(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.textContent = 'Subscribed ✓';
+    btn.style.background = '#146460';
+    e.target.querySelector('input').value = '';
+  }
+
+  // Scroll-to-top
+  const stb = document.getElementById('scrollTop');
+  window.addEventListener('scroll', () => stb.classList.toggle('show', window.scrollY > 600), { passive: true });
+  stb.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+</body>
+</html>
